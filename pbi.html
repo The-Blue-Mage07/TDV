@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualizador de Páginas</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: #000;
+        }
+        .page-container {
+            position: relative;
+            width: 1900px;
+            height: 1200px;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+        .content-frame {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border: none;
+            transition: opacity 0.5s ease;
+        }
+        .active {
+            opacity: 1;
+            z-index: 2;
+        }
+        .inactive {
+            opacity: 0;
+            z-index: 1;
+        }
+        .controls {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-family: Arial, sans-serif;
+        }
+        #countdown {
+            font-weight: bold;
+            color: #4CAF50;
+        }
+    </style>
+</head>
+<body>
+    <div class="page-container">
+        <iframe id="frame1" class="content-frame active" src="https://shorturl.at/CR7ag"></iframe>
+        <iframe id="frame2" class="content-frame inactive" src="https://shorturl.at/ky55q"></iframe>
+    </div>
+
+    <div class="controls">
+        Cambio automático en: <span id="countdown">8</span> segundos | 
+        <button id="togglePause">Pausar</button>
+    </div>
+
+    <script>
+        // Configuración
+        const config = {
+            interval: 10000, // 10 segundos (en milisegundos)
+            width: 2500,
+            height: 1250
+        };
+
+        // Elementos del DOM
+        const frame1 = document.getElementById('frame1');
+        const frame2 = document.getElementById('frame2');
+        const countdownElement = document.getElementById('countdown');
+        const togglePauseBtn = document.getElementById('togglePause');
+
+        // Variables de estado
+        let currentFrame = frame1;
+        let nextFrame = frame2;
+        let countdown = config.interval / 1000;
+        let isPaused = false;
+        let intervalId;
+
+        // Precarga de contenido
+        function preloadFrames() {
+            console.log("Precargando ambos frames...");
+            // Ya están cargados al incluir src directamente en el HTML
+        }
+
+        // Alternar entre frames
+        function toggleFrames() {
+            if (isPaused) return;
+            
+            currentFrame.classList.remove('active');
+            currentFrame.classList.add('inactive');
+            
+            nextFrame.classList.remove('inactive');
+            nextFrame.classList.add('active');
+            
+            // Intercambiar referencias
+            [currentFrame, nextFrame] = [nextFrame, currentFrame];
+            
+            // Reiniciar contador
+            countdown = config.interval / 1600;
+        }
+
+        // Actualizar contador
+        function updateCountdown() {
+            if (!isPaused) {
+                countdown--;
+                countdownElement.textContent = countdown;
+                
+                if (countdown <= 0) {
+                    toggleFrames();
+                }
+            }
+        }
+
+        // Control de pausa
+        function togglePause() {
+            isPaused = !isPaused;
+            togglePauseBtn.textContent = isPaused ? 'Reanudar' : 'Pausar';
+            countdownElement.style.color = isPaused ? '#F44336' : '#4CAF50';
+        }
+
+        // Inicialización
+        function init() {
+            preloadFrames();
+            
+            // Ajustar tamaño del contenedor
+            document.querySelector('.page-container').style.width = `${config.width}px`;
+            document.querySelector('.page-container').style.height = `${config.height}px`;
+            
+            // Configurar intervalos
+            setInterval(updateCountdown, 800);
+            intervalId = setInterval(toggleFrames, config.interval);
+            
+            // Event listeners
+            togglePauseBtn.addEventListener('click', togglePause);
+            
+            console.log("Visualizador iniciado con tamaño:", config.width, "×", config.height);
+        }
+
+        // Iniciar la aplicación
+        window.onload = init;
+    </script>
+</body>
+</html>
